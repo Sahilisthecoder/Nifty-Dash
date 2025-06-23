@@ -1,4 +1,5 @@
-
+# Create the app.py file content with dcc.Interval and callback
+app_py_content = """
 import dash
 from dash import dcc
 from dash import html
@@ -69,25 +70,24 @@ def analyze_nifty_data(nifty_historical_data):
     for start_year, end_year in consecutive_periods:
         end_year_timestamp = pd.Timestamp(f'{end_year}-12-31')
         try:
+            # Use method='nearest' to find the closest date if the exact date is not present
             end_year_index = yearly_returns.index.get_loc(end_year_timestamp, method='nearest')
 
-            if yearly_returns.index[end_year_index] < end_year_timestamp:
-                 if end_year_index + 1 < len(yearly_returns) and yearly_returns.index[end_year_index + 1] >= end_year_timestamp:
-                     end_year_index += 1
-                 else:
-                     continue
-
+            # Ensure the found index is within the bounds of the DataFrame
             if end_year_index < len(yearly_returns) and yearly_returns.index[end_year_index].year == end_year:
+                # Check for the next year
                 if end_year_index + 1 < len(yearly_returns):
                     next_year_return = yearly_returns.iloc[end_year_index + 1].item()
                     if next_year_return > mean_yearly_return.item():
                         count_next_year_exceeds += 1
 
+                # Check for the next two years
                 if end_year_index + 2 < len(yearly_returns):
                     next_two_years_return = yearly_returns.iloc[end_year_index + 2].item()
                     if next_year_return > mean_yearly_return.item() and next_two_years_return > mean_yearly_return.item():
                          count_next_two_years_exceeds += 1
         except KeyError:
+             # If even the nearest method fails (unlikely for yearly data), skip this period
              continue
 
     probability_next_year_exceeds = count_next_year_exceeds / total_negative_or_zero_periods if total_negative_or_zero_periods > 0 else 0
@@ -160,3 +160,10 @@ def update_data(n):
 # To run this app locally, uncomment the following:
 # if __name__ == '__main__':
 #     app.run_server(debug=True)
+"""
+
+# Write the app.py file
+with open("app.py", "w") as f:
+    f.write(app_py_content)
+
+print("app.py updated with robust date lookup logic.")
